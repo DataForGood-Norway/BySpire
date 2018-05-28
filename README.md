@@ -11,6 +11,7 @@ This project aims to bridge the current gap between controlled-environment agric
 | ![Sybolt](https://github.com/plantbolt.png?size=64)    | Sybolt Visser           | [@plantbolt](https://github.com/plantbolt)         | Project Lead |              |
 | ![Aiko](https://github.com/aikoyama.png?size=64)       | Aiko Fallas Yamashita   | [@aikoyama](https://github.com/aikoyama)           | Developer    |              |
 | ![Anne](https://github.com/MilooliM.png?size=64)       | Anne Miloschewski       | [@MilooliM](https://github.com/MilooliM)           | Developer    |              |
+|                 ---                                    | Dirk-Jan van Lubek      | [Team BySpire](http://www.byspire.no/#team)        | CTO BySpire  | BySpire      |
 | ![Harjeet](https://github.com/tanyuu.png?size=64)      | Harjeet Harpal          | [@tanyuu](https://github.com/tanyuu)               | Developer    |              |
 | ![Peter](https://github.com/PeterB83.png?size=64)      | Peter Malec             | [@PeterB83](https://github.com/PeterB83)           | Developer    |              |
 
