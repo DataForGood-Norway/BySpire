@@ -1,5 +1,7 @@
 import re
 import datetime
+import pandas as pd
+
 YEAR_DEFAULT = 2018
 
 def parse_sensor_filename(fn):
@@ -39,3 +41,58 @@ parse_sensor_filename.patterns = {
     '2': r'byspireMonitoring[^\d]*(?P<day>\d+)[_-](?P<month>\d+)[_-](?P<hour>\d\d)(?P<minute>\d\d).csv$',
     '3': r'byspireMonitoring[^\d]*(?P<rack>[\d\.]+)[_-](?P<day>\d+)[_-](?P<month>\d+)[_-](?P<hour>\d\d)(?P<minute>\d\d).csv$',
 }
+
+
+def sensor_csv_reader(fn):
+    """
+    A only just working csv loader that handles the formats we've seen so far...
+    Tests etc when we want to productionize a fixed schema.
+    """
+    resp = {'FILENAME': fn, 'DF': None, 'DF_EXCEPTION': None}
+    
+    # assume there is a header
+    try:
+        df = pd.read_csv("../data/Measurements/"+fn, parse_dates=['Date'])
+        if list(df.columns) == list(sensor_csv_reader.default_schema[:len(df.columns)]):
+            resp['DF'] = df
+            resp['HEADER'] = True
+            resp['NCOLS'] = len(df.columns)
+            resp['NROWS'] = len(df)
+            df['FILENAME'] = fn
+            return pd.Series(resp)
+    except Exception as e:
+        pass
+
+    # assume there isn't a header?
+    try:
+        ncols = len(pd.read_csv("../data/Measurements/"+fn, nrows=1).columns)
+        assert ncols > 3  # catch some fringe cases :(
+        df = pd.read_csv("../data/Measurements/"+fn, names=sensor_csv_reader.default_schema[:ncols], parse_dates=['Date'])
+        resp['DF'] = df
+        resp['HEADER'] = False
+        resp['NCOLS'] = len(df.columns)
+        resp['NROWS'] = len(df)
+        df['FILENAME'] = fn
+        return pd.Series(resp)
+    except Exception as e:
+        resp['DF_EXCEPTION'] = str(e)
+    
+    return pd.Series(resp)
+
+sensor_csv_reader.default_schema = ['Date', 'Time', 'Air temp', 'Humidity', 'Water level', 'Water temp',
+       'EC', 'pH', 'CO2', 'DO']
+
+
+def sensor_time_parser(ts):
+    """
+    Most match a %H:%M:%S format, but some have :000 three digit seconds, 000-059
+    """
+    try:
+        return datetime.datetime.strptime(ts, '%H:%M:%S').time()
+    except Exception as e:
+        pass
+    try:
+        return datetime.datetime.strptime(ts, '%H:%M:0%S').time()
+    except Exception as e:
+        pass
+    return None
