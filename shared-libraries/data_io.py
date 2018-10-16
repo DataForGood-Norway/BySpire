@@ -43,6 +43,17 @@ parse_sensor_filename.patterns = {
 }
 
 
+def sensor_csv_date_parser(s):
+    patterns_to_try = ['%Y-%m-%d', '%d/%m/%Y',]
+    for pattern in patterns_to_try:
+        try:
+            return datetime.datetime.strptime(s, pattern)
+        except Exception as e:
+            pass
+    raise Exception("Unseen date format encountered!")
+    return None
+
+
 def sensor_csv_reader(fn):
     """
     A only just working csv loader that handles the formats we've seen so far...
@@ -52,7 +63,8 @@ def sensor_csv_reader(fn):
     
     # assume there is a header
     try:
-        df = pd.read_csv("../data/Measurements/"+fn, parse_dates=['Date'])
+        df = pd.read_csv("../data/Measurements/"+fn)
+        df['Date'] = df['Date'].apply(sensor_csv_date_parser)
         if list(df.columns) == list(sensor_csv_reader.default_schema[:len(df.columns)]):
             resp['DF'] = df
             resp['HEADER'] = True
@@ -67,7 +79,9 @@ def sensor_csv_reader(fn):
     try:
         ncols = len(pd.read_csv("../data/Measurements/"+fn, nrows=1).columns)
         assert ncols > 3  # catch some fringe cases :(
-        df = pd.read_csv("../data/Measurements/"+fn, names=sensor_csv_reader.default_schema[:ncols], parse_dates=['Date'])
+        df = pd.read_csv("../data/Measurements/"+fn,
+                         names=sensor_csv_reader.default_schema[:ncols])
+        df['Date'] = df['Date'].apply(sensor_csv_date_parser)
         resp['DF'] = df
         resp['HEADER'] = False
         resp['NCOLS'] = len(df.columns)
